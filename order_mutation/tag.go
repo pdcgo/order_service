@@ -15,6 +15,10 @@ type tagMutationImpl struct {
 
 // Add implements order_iface.OrderTagMutation.
 func (t *tagMutationImpl) Add(from db_models.RelationFrom, orderIDs []uint, tags []string) error {
+	if len(tags) == 0 {
+		return nil
+	}
+
 	err := t.validateTask(tags)
 	if err != nil {
 		return err
@@ -55,6 +59,9 @@ func (t *tagMutationImpl) Add(from db_models.RelationFrom, orderIDs []uint, tags
 
 // Remove implements order_iface.OrderTagMutation.
 func (t *tagMutationImpl) Remove(from db_models.RelationFrom, orderIDs []uint, tags []string) error {
+	if len(tags) == 0 {
+		return nil
+	}
 	tagIds, err := t.getTagIds(tags)
 	if err != nil {
 		return err
