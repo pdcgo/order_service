@@ -3,7 +3,8 @@ module github.com/pdcgo/order_service
 go 1.24.2
 
 require (
-	github.com/pdcgo/shared v1.0.99
+	github.com/pdcgo/schema v1.0.67 // indirect
+	github.com/pdcgo/shared v1.0.100
 	github.com/stretchr/testify v1.11.1
 	gorm.io/gorm v1.25.12
 )
@@ -51,7 +52,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/pdcgo/schema v1.0.66 // indirect
 	github.com/pdcgo/v2_gots_sdk v1.3.10 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect

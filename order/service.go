@@ -91,7 +91,7 @@ func (o *orderServiceImpl) OrderFundSet(
 
 	source, err := custom_connect.GetRequestSource(ctx)
 	if err != nil {
-		return nil, errors.New("get errpr")
+		return nil, err
 	}
 	var domainID uint
 	switch source.RequestFrom {
@@ -170,7 +170,7 @@ func (o *orderServiceImpl) OrderFundSet(
 						Desc:    event.OrderFundSet.Desc,
 					}
 
-					err = tx.Save(ordAdjust).Error
+					err = tx.Save(&ordAdjust).Error
 					if err != nil {
 						return err
 					}
@@ -178,7 +178,7 @@ func (o *orderServiceImpl) OrderFundSet(
 					ordAdjust.Amount = event.OrderFundSet.Amount
 					ordAdjust.At = event.OrderFundSet.At.AsTime()
 					err = tx.
-						Save(ordAdjust).
+						Save(&ordAdjust).
 						Error
 					if err != nil {
 						return err
@@ -208,6 +208,7 @@ func (o *orderServiceImpl) OrderFundSet(
 					Model(&db_models.Order{}).
 					Where("id = ?", ord.ID).
 					Updates(map[string]interface{}{
+						"wd_total":   completedSet.Amount,
 						"wd_fund":    true,
 						"wd_fund_at": completedSet.WdAt.AsTime(),
 						"status":     db_models.OrdCompleted,
