@@ -1,0 +1,1 @@
+gcloud run deploy order-service --source . --no-traffic

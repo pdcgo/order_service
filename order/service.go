@@ -89,7 +89,10 @@ func (o *orderServiceImpl) OrderFundSet(
 ) (*connect.Response[order_iface.OrderFundSetResponse], error) {
 	var err error
 
-	source := custom_connect.GetRequestSource(ctx)
+	source, err := custom_connect.GetRequestSource(ctx)
+	if err != nil {
+		return nil, errors.New("get errpr")
+	}
 	var domainID uint
 	switch source.RequestFrom {
 	case access_iface.RequestFrom_REQUEST_FROM_ADMIN:
@@ -243,14 +246,18 @@ func (o *orderServiceImpl) OrderFundSet(
 					return err
 				}
 
-				// pokok dispatch
-				// o.trackingService.TagOrderRemove(ctx, &connect.Request[tracking_iface.TagOrderRemoveRequest]{
-				// 	Msg: &tracking_iface.TagOrderRemoveRequest{
-				// 		TeamId:  completedSet.TeamId,
-				// 		OrderId: uint64(ord.ID),
-				// 	},
-				// })
-				panic("not implemented tag")
+				// removing tag related
+				err = tx.
+					Model(&db_models.OrderTagRelation{}).
+					Where("relation_from = ?", db_models.RelationFromTracking).
+					Where("order_id = ?", ord.ID).
+					Delete(&db_models.OrderTagRelation{}).
+					Error
+
+				if err != nil {
+					return err
+				}
+
 			default:
 				return errors.New("unknown event orderfund")
 
