@@ -25,6 +25,16 @@ type orderServiceImpl struct {
 	trackingService tracking_ifaceconnect.TrackingServiceClient
 }
 
+// OrderList implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceImpl) OrderList(context.Context, *connect.Request[order_iface.OrderListRequest], *connect.ServerStream[order_iface.OrderListResponse]) error {
+	panic("unimplemented")
+}
+
+// OrderOverview implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceImpl) OrderOverview(context.Context, *connect.Request[order_iface.OrderOverviewRequest]) (*connect.Response[order_iface.OrderOverviewResponse], error) {
+	panic("unimplemented")
+}
+
 // OrderTagRemove implements order_ifaceconnect.OrderServiceHandler.
 func (o *orderServiceImpl) OrderTagRemove(context.Context, *connect.Request[order_iface.OrderTagRemoveRequest]) (*connect.Response[order_iface.OrderTagRemoveResponse], error) {
 	panic("unimplemented")
