@@ -35,7 +35,7 @@ func (t *tagMutationImpl) Add(from db_models.RelationFrom, orderIDs []uint, tags
 			relate := db_models.OrderTagRelation{
 				OrderID:      ordID,
 				OrderTagID:   tagID,
-				RelationFrom: db_models.RelationFromTracking,
+				RelationFrom: string(db_models.RelationFromTracking),
 			}
 			relates = append(relates, &relate)
 		}
