@@ -25,6 +25,21 @@ type orderServiceImpl struct {
 	trackingService tracking_ifaceconnect.TrackingServiceClient
 }
 
+// MpPaymentCreate implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceImpl) MpPaymentCreate(context.Context, *connect.Request[order_iface.MpPaymentCreateRequest]) (*connect.Response[order_iface.MpPaymentCreateResponse], error) {
+	panic("unimplemented")
+}
+
+// MpPaymentDelete implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceImpl) MpPaymentDelete(context.Context, *connect.Request[order_iface.MpPaymentDeleteRequest]) (*connect.Response[order_iface.MpPaymentDeleteResponse], error) {
+	panic("unimplemented")
+}
+
+// MpPaymentOrderList implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceImpl) MpPaymentOrderList(context.Context, *connect.Request[order_iface.MpPaymentOrderListRequest]) (*connect.Response[order_iface.MpPaymentOrderListResponse], error) {
+	panic("unimplemented")
+}
+
 // OrderList implements order_ifaceconnect.OrderServiceHandler.
 func (o *orderServiceImpl) OrderList(context.Context, *connect.Request[order_iface.OrderListRequest], *connect.ServerStream[order_iface.OrderListResponse]) error {
 	panic("unimplemented")

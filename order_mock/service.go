@@ -11,6 +11,21 @@ import (
 type orderServiceMock struct {
 }
 
+// MpPaymentCreate implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceMock) MpPaymentCreate(context.Context, *connect.Request[order_iface.MpPaymentCreateRequest]) (*connect.Response[order_iface.MpPaymentCreateResponse], error) {
+	panic("unimplemented")
+}
+
+// MpPaymentDelete implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceMock) MpPaymentDelete(context.Context, *connect.Request[order_iface.MpPaymentDeleteRequest]) (*connect.Response[order_iface.MpPaymentDeleteResponse], error) {
+	panic("unimplemented")
+}
+
+// MpPaymentOrderList implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceMock) MpPaymentOrderList(context.Context, *connect.Request[order_iface.MpPaymentOrderListRequest]) (*connect.Response[order_iface.MpPaymentOrderListResponse], error) {
+	panic("unimplemented")
+}
+
 // OrderTagAdd implements order_ifaceconnect.OrderServiceHandler.
 func (o *orderServiceMock) OrderTagAdd(context.Context, *connect.Request[order_iface.OrderTagAddRequest]) (*connect.Response[order_iface.OrderTagAddResponse], error) {
 	panic("unimplemented")
