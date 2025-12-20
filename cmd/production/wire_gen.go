@@ -34,7 +34,12 @@ func InitializeApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	registerHandler := order_service.NewRegister(serveMux, db, authorization, defaultInterceptor)
+	defaultClientInterceptor, err := custom_connect.NewDefaultClientInterceptor()
+	if err != nil {
+		return nil, err
+	}
+	revenueServiceClient := NewRevenueServiceClient(appConfig, defaultClientInterceptor)
+	registerHandler := order_service.NewRegister(serveMux, db, authorization, defaultInterceptor, revenueServiceClient)
 	app := NewApp(serveMux, registerHandler)
 	return app, nil
 }

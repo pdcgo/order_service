@@ -22,6 +22,10 @@ func InitializeApp() (*App, error) {
 		// client
 		custom_connect.NewDefaultInterceptor,
 
+		// external service
+		custom_connect.NewDefaultClientInterceptor,
+		NewRevenueServiceClient,
+
 		order_service.NewRegister,
 		NewApp,
 	)

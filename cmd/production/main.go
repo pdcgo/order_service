@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/pdcgo/order_service"
+	"github.com/pdcgo/schema/services/revenue_iface/v1/revenue_ifaceconnect"
 	"github.com/pdcgo/shared/authorization"
 	"github.com/pdcgo/shared/configs"
 	"github.com/pdcgo/shared/custom_connect"
@@ -34,6 +35,17 @@ func NewAuthorization(
 
 func NewCache(cfg *configs.AppConfig) (ware_cache.Cache, error) {
 	return ware_cache.NewCustomCache(cfg.CacheService.Endpoint), nil
+}
+
+func NewRevenueServiceClient(
+	cfg *configs.AppConfig,
+	defaultInterceptor custom_connect.DefaultClientInterceptor,
+) revenue_ifaceconnect.RevenueServiceClient {
+	return revenue_ifaceconnect.NewRevenueServiceClient(
+		http.DefaultClient,
+		cfg.AccountingService.Endpoint,
+		defaultInterceptor,
+	)
 }
 
 type App struct {
