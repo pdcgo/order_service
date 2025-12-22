@@ -61,7 +61,6 @@ func (o *orderServiceImpl) MpPaymentCreate(ctx context.Context, req *connect.Req
 
 	var adj db_models.OrderAdjustment
 	var teamID uint64
-	var adjExist bool
 
 	err = db.Transaction(func(tx *gorm.DB) error {
 
@@ -109,15 +108,30 @@ func (o *orderServiceImpl) MpPaymentCreate(ctx context.Context, req *connect.Req
 			if err != nil {
 				return err
 			}
+
+			if o.needAdjustmentReceivable(&adj) {
+				err = o.sendToReceivableAdjustment(ctx, teamID, pay, &adj, false)
+				if err != nil {
+					return err
+				}
+			}
+
 			result.Id = uint64(adj.ID)
 
 			return nil
 		}
 
-		adjExist = true
+		if adj.Amount == pay.Amount &&
+			adj.FundAt.Equal(pay.WdAt.AsTime()) &&
+			adj.At.Equal(pay.At.AsTime()) {
+			result.Id = uint64(adj.ID)
+			return nil
+		}
+
 		adj.Amount = pay.Amount
 		adj.Desc = pay.Desc
 		adj.FundAt = pay.WdAt.AsTime()
+		adj.At = pay.At.AsTime()
 		adj.Source = pay.Source
 
 		err = tx.Save(&adj).Error
@@ -126,41 +140,86 @@ func (o *orderServiceImpl) MpPaymentCreate(ctx context.Context, req *connect.Req
 			return err
 		}
 
-		var revType revenue_iface.ReceivableAdjustmentType
-		switch adj.Type {
-		case db_models.AdjReturn:
-			revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_RETURN
-		default:
-			return errors.New("unimplemented")
-		}
-
-		var desc string
-		if adjExist {
-			desc = fmt.Sprintf("edit %s sebelumnya", adj.Desc)
-		} else {
-			desc = pay.Desc
-		}
-
-		// send to accounting revenue adjustment
-		_, err = o.revenueService.SellingReceivableAdjustment(ctx, &connect.Request[revenue_iface.SellingReceivableAdjustmentRequest]{
-			Msg: &revenue_iface.SellingReceivableAdjustmentRequest{
-				OrderId:  uint64(adj.OrderID),
-				AdjRefId: fmt.Sprintf("%d", adj.ID),
-				TeamId:   teamID,
-				Amount:   adj.Amount,
-				Desc:     desc,
-				Type:     revType,
-			},
-		})
-
-		if err != nil {
-			return err
+		if o.needAdjustmentReceivable(&adj) {
+			err = o.sendToReceivableAdjustment(ctx, teamID, pay, &adj, true)
+			if err != nil {
+				return err
+			}
 		}
 
 		result.Id = uint64(adj.ID)
 		return nil
 	})
 
-	return &connect.Response[order_iface.MpPaymentCreateResponse]{}, nil
+	return &connect.Response[order_iface.MpPaymentCreateResponse]{}, err
 
+}
+
+func (o *orderServiceImpl) needAdjustmentReceivable(adj *db_models.OrderAdjustment) bool {
+	switch adj.Type {
+	case db_models.AdjReturn,
+		db_models.AdjCommision,
+		db_models.AdjCompensation,
+		db_models.AdjUnknown,
+		db_models.AdjUnknownAdj,
+		db_models.AdjLostCompensation:
+		return true
+
+	}
+
+	return false
+}
+
+func (o *orderServiceImpl) sendToReceivableAdjustment(
+	ctx context.Context,
+	teamID uint64,
+	pay *order_iface.MpPaymentCreateRequest,
+	adj *db_models.OrderAdjustment,
+	isEdited bool,
+) error {
+	var err error
+	revType, err := o.getType(adj)
+	if err != nil {
+		return err
+	}
+
+	var desc string
+	if isEdited {
+		desc = fmt.Sprintf("edit %s sebelumnya", adj.Desc)
+	} else {
+		desc = pay.Desc
+	}
+
+	// send to accounting revenue adjustment
+	_, err = o.revenueService.SellingReceivableAdjustment(ctx, &connect.Request[revenue_iface.SellingReceivableAdjustmentRequest]{
+		Msg: &revenue_iface.SellingReceivableAdjustmentRequest{
+			ShopId:   pay.ShopId,
+			OrderId:  uint64(adj.OrderID),
+			AdjRefId: fmt.Sprintf("%d", adj.ID),
+			TeamId:   teamID,
+			Amount:   adj.Amount,
+			Desc:     desc,
+			Type:     revType,
+			At:       pay.At,
+			WdAt:     pay.WdAt,
+		},
+	})
+
+	return err
+}
+
+func (o *orderServiceImpl) getType(adj *db_models.OrderAdjustment) (revenue_iface.ReceivableAdjustmentType, error) {
+	var revType revenue_iface.ReceivableAdjustmentType
+	switch adj.Type {
+	case db_models.AdjReturn:
+		revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_RETURN_COST
+
+	case db_models.AdjLostCompensation:
+		revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_REFUND_LOST
+
+	default:
+		return revType, errors.New("unimplemented")
+	}
+
+	return revType, nil
 }
