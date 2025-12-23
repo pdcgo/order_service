@@ -109,14 +109,15 @@ func (o *OrderPaymentManage) createOrderAdjustment(next NextFunc) NextFunc {
 
 		if adj.ID == 0 {
 			adj = db_models.OrderAdjustment{
-				OrderID: uint(pay.OrderId),
-				MpID:    uint(pay.ShopId),
-				At:      pay.At.AsTime(),
-				FundAt:  pay.WdAt.AsTime(),
-				Type:    db_models.AdjustmentType(pay.Type),
-				Amount:  pay.Amount,
-				Source:  pay.Source,
-				Desc:    pay.Desc,
+				OrderID:       uint(pay.OrderId),
+				MpID:          uint(pay.ShopId),
+				IsMultiRegion: pay.IsMultiRegion,
+				At:            pay.At.AsTime(),
+				FundAt:        pay.WdAt.AsTime(),
+				Type:          db_models.AdjustmentType(pay.Type),
+				Amount:        pay.Amount,
+				Source:        pay.Source,
+				Desc:          pay.Desc,
 			}
 
 			err = o.

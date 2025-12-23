@@ -149,8 +149,11 @@ func (o *orderServiceImpl) getType(adj *db_models.OrderAdjustment) (revenue_ifac
 	case db_models.AdjLostCompensation:
 		revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_REFUND_LOST
 
+	case db_models.AdjOrderFund:
+		revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_ORDER_FUND
+
 	default:
-		return revType, errors.New("unimplemented")
+		return revType, fmt.Errorf("%s not implemented", adj.Type)
 	}
 
 	return revType, nil
