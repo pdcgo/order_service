@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"connectrpc.com/connect"
 	"github.com/pdcgo/order_service/order/order_core"
@@ -112,6 +113,13 @@ func (o *orderServiceImpl) MpPaymentCreate(ctx context.Context, req *connect.Req
 				return err
 			}
 
+			amount := ordPayment.Adj.Amount
+			switch revType {
+			case revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_OTHER_COST,
+				revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_OTHER_REVENUE:
+				amount = math.Abs(amount)
+			}
+
 			// send to accounting revenue adjustment
 			_, err = o.revenueService.SellingReceivableAdjustment(ctx, &connect.Request[revenue_iface.SellingReceivableAdjustmentRequest]{
 				Msg: &revenue_iface.SellingReceivableAdjustmentRequest{
@@ -119,7 +127,7 @@ func (o *orderServiceImpl) MpPaymentCreate(ctx context.Context, req *connect.Req
 					OrderId:  uint64(ordPayment.Adj.OrderID),
 					AdjRefId: fmt.Sprintf("%d", ordPayment.Adj.ID),
 					TeamId:   pay.TeamId,
-					Amount:   ordPayment.Adj.Amount,
+					Amount:   amount,
 					Desc:     desc,
 					Type:     revType,
 					At:       pay.At,
@@ -152,8 +160,15 @@ func (o *orderServiceImpl) getType(adj *db_models.OrderAdjustment) (revenue_ifac
 	case db_models.AdjOrderFund:
 		revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_ORDER_FUND
 
+	case db_models.AdjPremi:
+		if adj.Amount < 0 {
+			revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_OTHER_COST
+		} else {
+			revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_OTHER_REVENUE
+		}
+
 	default:
-		return revType, fmt.Errorf("%s not implemented", adj.Type)
+		return revType, fmt.Errorf("%s revtype not mapped", adj.Type)
 	}
 
 	return revType, nil
