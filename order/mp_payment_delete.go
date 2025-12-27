@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+	"errors"
 
 	"connectrpc.com/connect"
 	"github.com/pdcgo/order_service/order/order_core"
@@ -16,6 +17,8 @@ import (
 // MpPaymentDelete implements order_ifaceconnect.OrderServiceHandler.
 func (o *orderServiceImpl) MpPaymentDelete(ctx context.Context, req *connect.Request[order_iface.MpPaymentDeleteRequest]) (*connect.Response[order_iface.MpPaymentDeleteResponse], error) {
 	var err error
+
+	return nil, errors.New("unimplemented")
 
 	source, err := custom_connect.GetRequestSource(ctx)
 	if err != nil {

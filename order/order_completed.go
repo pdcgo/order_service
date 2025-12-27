@@ -50,6 +50,9 @@ func (o *orderServiceImpl) OrderCompleted(ctx context.Context, req *connect.Requ
 	}
 	pay := req.Msg
 	db := o.db.WithContext(ctx)
+
+	// check jika sudah di adjust atau belum
+
 	err = db.Transaction(func(tx *gorm.DB) error {
 
 		err = tx.
@@ -60,6 +63,7 @@ func (o *orderServiceImpl) OrderCompleted(ctx context.Context, req *connect.Requ
 				db_models.OrdCancel,
 				db_models.OrdCompleted,
 				db_models.OrdReturnProblem,
+				db_models.OrdReturnCompleted,
 			}).
 			Updates(map[string]interface{}{
 				"status": db_models.OrdCompleted,
