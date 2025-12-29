@@ -93,7 +93,7 @@ func (o *orderServiceImpl) MpPaymentCreate(ctx context.Context, req *connect.Req
 					OrderId:  uint64(ordPayment.Adj.OrderID),
 					AdjRefId: fmt.Sprintf("%s-%d", pay.Type, ordPayment.Adj.ID),
 					TeamId:   pay.TeamId,
-					Amount:   ordPayment.Adj.Amount,
+					Amount:   ordPayment.CreatedReceivableAdjustmentAmount,
 					Desc:     desc,
 					Type:     revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_CREATED_REVENUE,
 					At:       pay.At,
