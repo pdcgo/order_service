@@ -86,24 +86,27 @@ func (o *orderServiceImpl) MpPaymentCreate(ctx context.Context, req *connect.Req
 		}
 
 		if ordPayment.IsReceivableCreatedAdjustment {
-			// send to accounting revenue adjustment
-			_, err = o.revenueService.SellingReceivableAdjustment(ctx, &connect.Request[revenue_iface.SellingReceivableAdjustmentRequest]{
-				Msg: &revenue_iface.SellingReceivableAdjustmentRequest{
-					ShopId:   pay.ShopId,
-					OrderId:  uint64(ordPayment.Adj.OrderID),
-					AdjRefId: fmt.Sprintf("%s-%d", pay.Type, ordPayment.Adj.ID),
-					TeamId:   pay.TeamId,
-					Amount:   ordPayment.CreatedReceivableAdjustmentAmount,
-					Desc:     desc,
-					Type:     revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_CREATED_REVENUE,
-					At:       pay.At,
-					WdAt:     pay.WdAt,
-				},
-			})
+			if ordPayment.CreatedReceivableAdjustmentAmount != 0 {
+				// send to accounting revenue adjustment
+				_, err = o.revenueService.SellingReceivableAdjustment(ctx, &connect.Request[revenue_iface.SellingReceivableAdjustmentRequest]{
+					Msg: &revenue_iface.SellingReceivableAdjustmentRequest{
+						ShopId:   pay.ShopId,
+						OrderId:  uint64(ordPayment.Adj.OrderID),
+						AdjRefId: fmt.Sprintf("%s-%d", pay.Type, ordPayment.Adj.ID),
+						TeamId:   pay.TeamId,
+						Amount:   ordPayment.CreatedReceivableAdjustmentAmount,
+						Desc:     desc,
+						Type:     revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_CREATED_REVENUE,
+						At:       pay.At,
+						WdAt:     pay.WdAt,
+					},
+				})
 
-			if err != nil {
-				return err
+				if err != nil {
+					return err
+				}
 			}
+
 		}
 
 		if ordPayment.IsSendReceivableAdjustment {
@@ -167,7 +170,8 @@ func (o *orderServiceImpl) getType(adj *db_models.OrderAdjustment) (revenue_ifac
 			revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_OTHER_REVENUE
 		}
 
-	case db_models.AdjUnknownAdj:
+	case db_models.AdjUnknownAdj,
+		db_models.AdjPackaging:
 		if adj.Amount < 0 {
 			revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_OTHER_COST
 		} else {
