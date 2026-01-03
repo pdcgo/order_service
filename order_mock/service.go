@@ -11,6 +11,11 @@ import (
 type orderServiceMock struct {
 }
 
+// ChangeEstRevenue implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceMock) ChangeEstRevenue(context.Context, *connect.Request[order_iface.ChangeEstRevenueRequest]) (*connect.Response[order_iface.ChangeEstRevenueResponse], error) {
+	panic("unimplemented")
+}
+
 // OrderCompleted implements order_ifaceconnect.OrderServiceHandler.
 func (o *orderServiceMock) OrderCompleted(context.Context, *connect.Request[order_iface.OrderCompletedRequest]) (*connect.Response[order_iface.OrderCompletedResponse], error) {
 	panic("unimplemented")
