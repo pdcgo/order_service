@@ -11,6 +11,31 @@ import (
 type orderServiceMock struct {
 }
 
+// OrderDraftList implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceMock) OrderDraftList(context.Context, *connect.Request[order_iface.OrderDraftListRequest]) (*connect.Response[order_iface.OrderDraftListResponse], error) {
+	panic("unimplemented")
+}
+
+// OrderDraftGet implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceMock) OrderDraftGet(context.Context, *connect.Request[order_iface.OrderDraftGetRequest]) (*connect.Response[order_iface.OrderDraftGetResponse], error) {
+	panic("unimplemented")
+}
+
+// OrderCreate implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceMock) OrderCreate(context.Context, *connect.Request[order_iface.OrderCreateRequest]) (*connect.Response[order_iface.OrderCreateResponse], error) {
+	panic("unimplemented")
+}
+
+// OrderDraftDelete implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceMock) OrderDraftDelete(context.Context, *connect.Request[order_iface.OrderDraftDeleteRequest]) (*connect.Response[order_iface.OrderDraftDeleteResponse], error) {
+	panic("unimplemented")
+}
+
+// OrderDraftCreate implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceMock) OrderDraftCreate(context.Context, *connect.Request[order_iface.OrderDraftCreateRequest]) (*connect.Response[order_iface.OrderDraftCreateResponse], error) {
+	panic("unimplemented")
+}
+
 // ChangeEstRevenue implements order_ifaceconnect.OrderServiceHandler.
 func (o *orderServiceMock) ChangeEstRevenue(context.Context, *connect.Request[order_iface.ChangeEstRevenueRequest]) (*connect.Response[order_iface.ChangeEstRevenueResponse], error) {
 	panic("unimplemented")

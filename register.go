@@ -11,7 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
-type RegisterHandler func()
+type ServiceReflectNames []string
+type RegisterHandler func() ServiceReflectNames
 
 func NewRegister(
 	mux *http.ServeMux,
@@ -21,7 +22,9 @@ func NewRegister(
 	defaultInterceptor custom_connect.DefaultInterceptor,
 	revenueService revenue_ifaceconnect.RevenueServiceClient,
 ) RegisterHandler {
-	return func() {
+	return func() ServiceReflectNames {
+		grpcReflect := ServiceReflectNames{}
+
 		path, handler := order_ifaceconnect.NewOrderServiceHandler(order.NewOrderService(
 			auth,
 			db,
@@ -29,5 +32,9 @@ func NewRegister(
 			// trackingService,
 		), defaultInterceptor)
 		mux.Handle(path, handler)
+		grpcReflect = append(grpcReflect, order_ifaceconnect.OrderServiceName)
+
+		return grpcReflect
+
 	}
 }

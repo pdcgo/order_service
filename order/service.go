@@ -18,6 +18,11 @@ type orderServiceImpl struct {
 	revenueService revenue_ifaceconnect.RevenueServiceClient
 }
 
+// OrderCreate implements order_ifaceconnect.OrderServiceHandler.
+func (o *orderServiceImpl) OrderCreate(context.Context, *connect.Request[order_iface.OrderCreateRequest]) (*connect.Response[order_iface.OrderCreateResponse], error) {
+	panic("unimplemented")
+}
+
 // ChangeOrderRefID implements order_ifaceconnect.OrderServiceHandler.
 func (o *orderServiceImpl) ChangeOrderRefID(context.Context, *connect.Request[order_iface.ChangeOrderRefIDRequest]) (*connect.Response[order_iface.ChangeOrderRefIDResponse], error) {
 	panic("unimplemented")
