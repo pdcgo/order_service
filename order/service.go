@@ -47,12 +47,10 @@ func NewOrderService(
 	auth authorization_iface.Authorization,
 	db *gorm.DB,
 	revenueService revenue_ifaceconnect.RevenueServiceClient,
-	// trackingService tracking_ifaceconnect.TrackingServiceClient,
 ) *orderServiceImpl {
 	return &orderServiceImpl{
 		auth,
 		db,
 		revenueService,
-		// trackingService: trackingService,
 	}
 }
