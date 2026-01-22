@@ -69,16 +69,18 @@ func (o *orderServiceImpl) OrderReturnArrived(
 		if !payment.IsReceivableAdjusted {
 			// call mp adjustment
 			aftertx = append(aftertx, func() error {
+
 				_, err = o.revenueService.SellingReceivableAdjustment(ctx, connect.NewRequest(
 					&revenue_iface.SellingReceivableAdjustmentRequest{
-						OrderId: uint64(ord.ID),
-						TeamId:  uint64(ord.TeamID),
-						ShopId:  uint64(ord.OrderMpID),
-						Amount:  float64(ord.OrderMpTotal),
-						Desc:    "accept return to warehouse",
-						Type:    revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_CANCEL_RECEIVE,
-						At:      timestamppb.Now(),
-						WdAt:    timestamppb.Now(),
+						OrderId:  uint64(ord.ID),
+						TeamId:   uint64(ord.TeamID),
+						ShopId:   uint64(ord.OrderMpID),
+						Amount:   float64(ord.OrderMpTotal),
+						Desc:     "accept return to warehouse",
+						Type:     revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_CANCEL_RECEIVE,
+						At:       timestamppb.Now(),
+						WdAt:     timestamppb.Now(),
+						AdjRefId: ord.OrderRefID,
 					},
 				))
 				return err
