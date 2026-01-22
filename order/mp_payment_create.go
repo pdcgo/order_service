@@ -178,6 +178,13 @@ func (o *orderServiceImpl) getType(adj *db_models.OrderAdjustment) (revenue_ifac
 			revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_OTHER_REVENUE
 		}
 
+	case db_models.AdjShipping:
+		if adj.Amount < 0 {
+			revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_OTHER_COST
+		} else {
+			revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_OTHER_REVENUE
+		}
+
 	default:
 		return revType, fmt.Errorf("%s revtype not mapped", adj.Type)
 	}
