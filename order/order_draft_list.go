@@ -7,10 +7,10 @@ import (
 	"github.com/pdcgo/schema/services/access_iface/v1"
 	"github.com/pdcgo/schema/services/common/v1"
 	"github.com/pdcgo/schema/services/order_iface/v1"
-	"github.com/pdcgo/shared/authorization"
 	"github.com/pdcgo/shared/custom_connect"
 	"github.com/pdcgo/shared/db_connect"
 	"github.com/pdcgo/shared/interfaces/authorization_iface"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 )
 
@@ -46,7 +46,7 @@ func (o *orderServiceImpl) OrderDraftList(
 	case access_iface.RequestFrom_REQUEST_FROM_SELLING:
 		domainId = uint(pay.TeamId)
 	case access_iface.RequestFrom_REQUEST_FROM_ADMIN:
-		domainId = authorization.RootDomain
+		domainId = uint(source.TeamId)
 	default:
 		domainId = uint(pay.TeamId)
 	}
@@ -71,8 +71,8 @@ func (o *orderServiceImpl) OrderDraftList(
 				query = query.
 					Model(&DraftOrder{})
 
-				if pay.TeamId == 0 {
-					query = query.Where("team_id = ?", domainId)
+				if pay.TeamId != 0 {
+					query = query.Where("team_id = ?", pay.TeamId)
 				}
 
 				if pay.UserId != 0 {
@@ -178,9 +178,11 @@ func (o *orderServiceImpl) OrderDraftList(
 				for i, data := range datas {
 					res.Items[i] = &order_iface.DraftItem{
 						Id:         uint64(data.ID),
+						UserId:     uint64(data.UserID),
 						TeamId:     uint64(data.TeamID),
 						MpProducts: data.MpProducts,
 						Payload:    data.OrderPayload.Data(),
+						Created:    timestamppb.New(data.Created),
 					}
 				}
 
