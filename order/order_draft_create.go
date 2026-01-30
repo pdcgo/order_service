@@ -114,7 +114,7 @@ func (o *orderServiceImpl) OrderDraftCreate(
 
 		createPay.DraftId = uint64(draft.ID)
 		if createPay.OrderDeadline.IsValid() {
-			deadline := createPay.OrderDeadline.AsTime().Add(time.Minute * -1)
+			deadline := createPay.OrderDeadline.AsTime().AddDate(0, 0, 1).Add(time.Minute * -1)
 			createPay.OrderDeadline = timestamppb.New(deadline)
 		}
 
