@@ -5,6 +5,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/pdcgo/schema/services/order_iface/v1"
+	"github.com/pdcgo/shared/db_models"
 )
 
 // OrderDraftCheck implements order_ifaceconnect.OrderServiceHandler.
@@ -47,6 +48,24 @@ func (o *orderServiceImpl) OrderDraftCheck(
 
 	for _, draft := range draftList {
 		result.Data[draft.OrderRefID].IsExist = true
+	}
+
+	// getting from order
+	var ords []*db_models.Order
+	err = db.
+		Model(&db_models.Order{}).
+		Select([]string{"id", "order_ref_id"}).
+		Where("order_ref_id IN ?", pay.OrderRefIds).
+		Where("team_id = ?", pay.TeamId).
+		Find(&ords).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ord := range ords {
+		result.Data[ord.OrderRefID].IsExist = true
 	}
 
 	return connect.NewResponse(&result), nil

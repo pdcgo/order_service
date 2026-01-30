@@ -3,7 +3,7 @@ module github.com/pdcgo/order_service
 go 1.24.2
 
 require (
-	github.com/pdcgo/schema v1.0.100
+	github.com/pdcgo/schema v1.0.101
 	github.com/pdcgo/shared v1.0.121
 	github.com/stretchr/testify v1.11.1
 	gorm.io/gorm v1.31.1

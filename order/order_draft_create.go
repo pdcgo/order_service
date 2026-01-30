@@ -9,6 +9,7 @@ import (
 	"github.com/pdcgo/schema/services/order_iface/v1"
 	"github.com/pdcgo/shared/db_models"
 	"github.com/pdcgo/shared/interfaces/authorization_iface"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -112,6 +113,11 @@ func (o *orderServiceImpl) OrderDraftCreate(
 		}
 
 		createPay.DraftId = uint64(draft.ID)
+		if createPay.OrderDeadline.IsValid() {
+			deadline := createPay.OrderDeadline.AsTime().Add(time.Minute * -1)
+			createPay.OrderDeadline = timestamppb.New(deadline)
+		}
+
 		draft.OrderPayload = db_models.NewJSONType(createPay)
 
 		err = tx.Save(&draft).Error
