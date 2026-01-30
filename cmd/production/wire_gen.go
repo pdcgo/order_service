@@ -40,6 +40,7 @@ func InitializeApp() (*App, error) {
 	}
 	revenueServiceClient := NewRevenueServiceClient(appConfig, defaultClientInterceptor)
 	registerHandler := order_service.NewRegister(serveMux, db, authorization, defaultInterceptor, revenueServiceClient)
-	app := NewApp(serveMux, registerHandler)
+	registerReflectFunc := custom_connect.NewRegisterReflect(serveMux)
+	app := NewApp(serveMux, registerHandler, registerReflectFunc)
 	return app, nil
 }

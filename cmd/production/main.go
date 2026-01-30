@@ -55,6 +55,7 @@ type App struct {
 func NewApp(
 	mux *http.ServeMux,
 	orderRegister order_service.RegisterHandler,
+	reflectRegister custom_connect.RegisterReflectFunc,
 ) *App {
 	return &App{
 		Run: func() error {
@@ -66,7 +67,11 @@ func NewApp(
 			defer cancel(context.Background())
 
 			// register api
-			orderRegister()
+
+			var grpcReflectNames []string
+			grpcReflectNames = append(grpcReflectNames, orderRegister()...)
+
+			reflectRegister(grpcReflectNames)
 
 			port := os.Getenv("PORT")
 			if port == "" {
