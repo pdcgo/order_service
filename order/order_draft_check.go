@@ -65,7 +65,7 @@ func (o *orderServiceImpl) OrderDraftCheck(
 	}
 
 	for _, ord := range ords {
-		result.Data[ord.OrderRefID].IsExist = true
+		result.Data[ord.OrderRefID].OrderIsExist = true
 	}
 
 	return connect.NewResponse(&result), nil
