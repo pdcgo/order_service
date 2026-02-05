@@ -163,7 +163,8 @@ func (o *orderServiceImpl) getType(adj *db_models.OrderAdjustment) (revenue_ifac
 	case db_models.AdjOrderFund:
 		revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_ORDER_FUND
 
-	case db_models.AdjPremi:
+	case db_models.AdjPremi,
+		db_models.AdjCommision:
 		if adj.Amount < 0 {
 			revType = revenue_iface.ReceivableAdjustmentType_RECEIVABLE_ADJUSTMENT_TYPE_OTHER_COST
 		} else {
