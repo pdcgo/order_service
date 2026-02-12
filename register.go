@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/pdcgo/order_service/order"
+	"github.com/pdcgo/order_service/report"
 	"github.com/pdcgo/schema/services/order_iface/v1/order_ifaceconnect"
 	"github.com/pdcgo/schema/services/revenue_iface/v1/revenue_ifaceconnect"
 	"github.com/pdcgo/shared/custom_connect"
@@ -33,6 +34,10 @@ func NewRegister(
 		), defaultInterceptor)
 		mux.Handle(path, handler)
 		grpcReflect = append(grpcReflect, order_ifaceconnect.OrderServiceName)
+
+		path, handler = order_ifaceconnect.NewOrderReportServiceHandler(report.NewOrderReportService(db), defaultInterceptor)
+		mux.Handle(path, handler)
+		grpcReflect = append(grpcReflect, order_ifaceconnect.OrderReportServiceName)
 
 		return grpcReflect
 
