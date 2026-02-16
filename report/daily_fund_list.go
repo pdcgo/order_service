@@ -80,6 +80,16 @@ func (o *orderReportServiceImpl) DailyFundList(
 			}
 		},
 		func(db *gorm.DB, next db_connect.NextFunc) db_connect.NextFunc {
+			return func(query *gorm.DB) (*gorm.DB, error) { // day sort
+
+				if pay.Sort == order_iface.DaySort_DAY_SORT_DESC {
+					query = query.Order("d.day DESC")
+				}
+
+				return next(query)
+			}
+		},
+		func(db *gorm.DB, next db_connect.NextFunc) db_connect.NextFunc {
 			return func(query *gorm.DB) (*gorm.DB, error) { // set pagination
 				var err error
 				var paginated *gorm.DB
