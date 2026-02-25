@@ -6,6 +6,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/pdcgo/schema/services/order_iface/v1"
 	"github.com/pdcgo/schema/services/revenue_iface/v1/revenue_ifaceconnect"
+	"github.com/pdcgo/schema/services/tracking_iface/v1/tracking_ifaceconnect"
 	"github.com/pdcgo/shared/interfaces/authorization_iface"
 	"gorm.io/gorm"
 )
@@ -16,6 +17,7 @@ type orderServiceImpl struct {
 	// revenueClient revenue_ifaceconnect.RevenueServiceClient
 	// trackingService tracking_ifaceconnect.TrackingServiceClient
 	revenueService revenue_ifaceconnect.RevenueServiceClient
+	trackService   tracking_ifaceconnect.TrackingServiceClient
 }
 
 // OrderCreate implements order_ifaceconnect.OrderServiceHandler.
@@ -47,10 +49,12 @@ func NewOrderService(
 	auth authorization_iface.Authorization,
 	db *gorm.DB,
 	revenueService revenue_ifaceconnect.RevenueServiceClient,
+	trackService tracking_ifaceconnect.TrackingServiceClient,
 ) *orderServiceImpl {
 	return &orderServiceImpl{
 		auth,
 		db,
 		revenueService,
+		trackService,
 	}
 }

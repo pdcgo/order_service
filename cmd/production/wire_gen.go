@@ -15,7 +15,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApp() (*App, error) {
+func InitializeApp() (App, error) {
 	serveMux := http.NewServeMux()
 	appConfig, err := configs.NewProductionConfig()
 	if err != nil {
@@ -30,17 +30,23 @@ func InitializeApp() (*App, error) {
 		return nil, err
 	}
 	authorization := NewAuthorization(appConfig, db, cache)
-	defaultInterceptor, err := custom_connect.NewDefaultInterceptor()
-	if err != nil {
-		return nil, err
-	}
 	defaultClientInterceptor, err := custom_connect.NewDefaultClientInterceptor()
 	if err != nil {
 		return nil, err
 	}
+	trackingServiceClient := NewTrackingServiceClient(appConfig, defaultClientInterceptor)
+	defaultInterceptor, err := custom_connect.NewDefaultInterceptor()
+	if err != nil {
+		return nil, err
+	}
 	revenueServiceClient := NewRevenueServiceClient(appConfig, defaultClientInterceptor)
-	registerHandler := order_service.NewRegister(serveMux, db, authorization, defaultInterceptor, revenueServiceClient)
+	registerHandler := order_service.NewRegister(serveMux, db, authorization, trackingServiceClient, defaultInterceptor, revenueServiceClient)
 	registerReflectFunc := custom_connect.NewRegisterReflect(serveMux)
-	app := NewApp(serveMux, registerHandler, registerReflectFunc)
+	apiFunc := NewApi(serveMux, registerHandler, registerReflectFunc)
+	createTokenFromUsername := NewCreateTokenFromUsername(db, appConfig)
+	setAuthorization := NewSetAuthorization(createTokenFromUsername, appConfig)
+	helper := NewHelper(createTokenFromUsername, setAuthorization)
+	orderShippedFunc := NewOrderShipped(db, appConfig, defaultClientInterceptor, helper)
+	app := NewApp(apiFunc, orderShippedFunc)
 	return app, nil
 }

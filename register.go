@@ -7,6 +7,7 @@ import (
 	"github.com/pdcgo/order_service/report"
 	"github.com/pdcgo/schema/services/order_iface/v1/order_ifaceconnect"
 	"github.com/pdcgo/schema/services/revenue_iface/v1/revenue_ifaceconnect"
+	"github.com/pdcgo/schema/services/tracking_iface/v1/tracking_ifaceconnect"
 	"github.com/pdcgo/shared/custom_connect"
 	"github.com/pdcgo/shared/interfaces/authorization_iface"
 	"gorm.io/gorm"
@@ -19,7 +20,7 @@ func NewRegister(
 	mux *http.ServeMux,
 	db *gorm.DB,
 	auth authorization_iface.Authorization,
-	// trackingService tracking_ifaceconnect.TrackingServiceClient,
+	trackingService tracking_ifaceconnect.TrackingServiceClient,
 	defaultInterceptor custom_connect.DefaultInterceptor,
 	revenueService revenue_ifaceconnect.RevenueServiceClient,
 ) RegisterHandler {
@@ -30,7 +31,7 @@ func NewRegister(
 			auth,
 			db,
 			revenueService,
-			// trackingService,
+			trackingService,
 		), defaultInterceptor)
 		mux.Handle(path, handler)
 		grpcReflect = append(grpcReflect, order_ifaceconnect.OrderServiceName)

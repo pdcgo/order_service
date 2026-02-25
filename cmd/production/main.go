@@ -2,13 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"net/http"
 	"os"
 
-	"github.com/pdcgo/order_service"
 	"github.com/pdcgo/schema/services/revenue_iface/v1/revenue_ifaceconnect"
+	"github.com/pdcgo/schema/services/tracking_iface/v1/tracking_ifaceconnect"
 	"github.com/pdcgo/shared/authorization"
 	"github.com/pdcgo/shared/configs"
 	"github.com/pdcgo/shared/custom_connect"
@@ -16,8 +14,7 @@ import (
 	"github.com/pdcgo/shared/interfaces/authorization_iface"
 	"github.com/pdcgo/shared/pkg/cloud_logging"
 	"github.com/pdcgo/shared/pkg/ware_cache"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
+	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
@@ -48,61 +45,59 @@ func NewRevenueServiceClient(
 	)
 }
 
-type App struct {
-	Run func() error
+func NewTrackingServiceClient(
+	cfg *configs.AppConfig,
+	defaultInterceptor custom_connect.DefaultClientInterceptor,
+) tracking_ifaceconnect.TrackingServiceClient {
+	return tracking_ifaceconnect.NewTrackingServiceClient(
+		http.DefaultClient,
+		cfg.TrackingService.Endpoint,
+		defaultInterceptor,
+	)
 }
 
+type App *cli.Command
+
+// type App struct {
+// 	Run func() error
+// }
+
 func NewApp(
-	mux *http.ServeMux,
-	orderRegister order_service.RegisterHandler,
-	reflectRegister custom_connect.RegisterReflectFunc,
-) *App {
-	return &App{
-		Run: func() error {
-			cancel, err := custom_connect.InitTracer("order-service")
-			if err != nil {
-				return err
-			}
+	api ApiFunc,
+	orderShipped OrderShippedFunc,
+) App {
 
-			defer cancel(context.Background())
-
-			// register api
-
-			var grpcReflectNames []string
-			grpcReflectNames = append(grpcReflectNames, orderRegister()...)
-
-			reflectRegister(grpcReflectNames)
-
-			port := os.Getenv("PORT")
-			if port == "" {
-				port = "8083"
-			}
-
-			host := os.Getenv("HOST")
-			listen := fmt.Sprintf("%s:%s", host, port)
-			log.Println("listening on", listen)
-
-			http.ListenAndServe(
-				listen,
-				// Use h2c so we can serve HTTP/2 without TLS.
-				h2c.NewHandler(
-					custom_connect.WithCORS(mux),
-					&http2.Server{}),
-			)
-
-			return nil
+	return &cli.Command{
+		Commands: []*cli.Command{
+			{
+				Name:        "batch",
+				Description: "untuk batch updater",
+				Commands: []*cli.Command{
+					{
+						Name:        "shipped",
+						Description: "check updated order shipped",
+						Action:      cli.ActionFunc(orderShipped),
+					},
+				},
+			},
 		},
+
+		Action: cli.ActionFunc(api),
 	}
 }
 
 func main() {
-	cloud_logging.SetCloudLoggingDefault()
+	if os.Getenv("DISABLE_CLOUD_LOGGING") == "" {
+		cloud_logging.SetCloudLoggingDefault()
+	}
+
 	app, err := InitializeApp()
 	if err != nil {
 		panic(err)
 	}
 
-	err = app.Run()
+	var run *cli.Command = app
+	err = run.Run(context.Background(), os.Args)
 	if err != nil {
 		panic(err)
 	}
