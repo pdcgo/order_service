@@ -1,0 +1,1 @@
+gcloud run jobs deploy job-order-shipped --source .
